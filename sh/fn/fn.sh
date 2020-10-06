@@ -61,10 +61,3 @@ esac
 
 help=""
 if test "$help";then print_help;fi
-
-
-printf "%s%s" "
- ▁▁
-╭  ╮
-▏  ▕
-"
