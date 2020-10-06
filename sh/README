@@ -1,0 +1,4 @@
+this directory is for shell scripts,
+ specifically the bourne-style posix sh compatible ones.  
+  
+for now there's no different categorization for bash/zsh/posix sh, etc.
