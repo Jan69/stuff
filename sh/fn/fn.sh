@@ -70,7 +70,7 @@ run_unknown(){
 }
 
 test_arg_file "$1"
-ret 99
+ret 2
 case $? in
 (0) run_normal ;;
 (1) run_invalid;;
