@@ -8,14 +8,27 @@ by using "true" aka ":" and just giving the comment as argument(s)
 the arguments are ignored, so it's a nearly no-op comment
 "
 
-#tiny utility functions
+#variables, mostly to ease debug and testing
+
+#booleans, default to empty/commented for release, set a value to debug
+variables() true;
+#help='  ;_;  '
+debug=' "_"  '
+
+
+#reusable utility functions
 
 ret(){ return "$1";} ;: "return a status code
 (regular "return" requires to be inside a function or such statement)"
 
 eecho() { echo >&2 "$@";} #error echo (echo to stderr)
+eprintf() { printf >&2 "$@";}
 
-eprintf() { printf >&2 "$@";} #error printf (printf to stderr)
+decho() { if [ "$1" ];then shift;eecho "$@";fi;} #if variable, then echo
+dprintf() { if [ "$1" ];then shift;eprintf "$@";fi;}
+
+ddecho() { decho "$debug" "$@";} #echo if debug, else nothing
+ddprintf() { dprintf "$debug" "$@";}
 
 randbit() { #returns and outputs either 1 or 0
  a="$(
@@ -31,6 +44,9 @@ randbit() { #returns and outputs either 1 or 0
  fi
 }
 
+
+#main functions
+
 print_usage() { printf "%s" "\
 usage: $(basename $0) <filename>
 " >&2;}
@@ -41,32 +57,33 @@ print_help() {
 
 test_arg_file() {
  if test -n "$1";then
-  eecho "argument given"
- else eecho "no argument";return 2
+  ddecho "argument given"
+ else ddecho "no argument";return 2
  fi
  if [ -e "$1" -o "0" -eq "$(which "$1" >/dev/null;echo $?)" ];then
-  eecho "file exists";return 0
- else eecho "invalid filename";return 1
+  ddecho "file exists";return 0
+ else ddecho "invalid filename";return 1
  fi
 }
 
 run_normal(){
- eecho "normality"
+ ddecho "normality"
 } 
 run_invalid(){
- eecho "invalidity"
+ ddecho "invalidity"
 }
 run_self(){
- eecho "selfity"
+ ddecho "selfity"
 }
 run_unknown(){
- eecho "FATALITY! $@"
+ ddprintf "%s" "FATALITY! $@"
  if [ "$(randbit)" != 0 ];then
   a="HIM"
  else
   a="HER"
  fi
- return $(echo "FINISH $a!"|tee /dev/stderr|wc -c)
+ ddecho "finish $a"
+ return $(echo "FINISH $a!"|wc -c) #always returns 12
 }
 
 test_arg_file "$1"
@@ -78,5 +95,4 @@ case $? in
 (*) run_unknown;;
 esac
 
-help=""
 if test "$help";then print_help;fi
