@@ -2,14 +2,33 @@
 # this is a script to help manage shell functions
 # it rudimentally parses given file for apparrent function declarations
 # and lists the names of found functions
+: "
+you can cheat multiline comments
+by using "true" aka ":" and just giving the comment as argument(s)
+the arguments are ignored, so it's a nearly no-op comment
+"
+
+#tiny utility functions
 
 ret(){ return "$1";} ;: "return a status code
 (regular "return" requires to be inside a function or such statement)"
+
 eecho() { echo >&2 "$@";} #error echo (echo to stderr)
+
 eprintf() { printf >&2 "$@";} #error printf (printf to stderr)
-randbit() {
- a="$(LC_ALL=C grep -ao "[[:digit:]]" /dev/urandom|head -n 3|shuf|head -n 1)"
- if test "$a" -ge 5;then echo 1;return 1; else echo 0;return 0;fi
+
+randbit() { #returns and outputs either 1 or 0
+ a="$(
+   LC_ALL=C grep -ao "[[:digit:]]" /dev/urandom|
+   head -n 3|shuf|head -n 1
+ )"
+ if test "$a" -ge 5;then
+  printf "%d" 1;
+  return 1;
+ else
+  printf "%d" 0;
+  return 0;
+ fi
 }
 
 print_usage() { printf "%s" "\
