@@ -2,24 +2,27 @@
 # this is a script to help manage shell functions
 # it rudimentally parses given file for apparrent function declarations
 # and lists the names of found functions
+
+#comments with JUMP are jump points because of a plugin in my editor (geany "addons" addon)
 : "
 you can cheat multiline comments
 by using "true" aka ":" and just giving the comment as argument(s)
 the arguments are ignored, so it's a nearly no-op comment
 "
 
-#variables, mostly to ease debug and testing
+#JUMP variables, mostly to ease debug and testing TODO: split off and source
 
 #booleans, default to empty/commented for release, set a value to debug
 variables() true;
 #help='  ;_;  '
 debug=' "_"  '
+#runmode=2 #set this to override runmode 0=normal 1=invalid 2=self *=???
 
 
 #reusable utility functions
 
-ret(){ return "$1";} ;: "return a status code
-(regular "return" requires to be inside a function or such statement)"
+ret(){ return "$1";} ;: 'return a status code
+(regular "return" requires to be inside a function or such statement)'
 
 eecho() { echo >&2 "$@";} #error echo (echo to stderr)
 eprintf() { printf >&2 "$@";}
@@ -87,7 +90,9 @@ run_unknown(){
 }
 
 test_arg_file "$1"
-ret 2
+
+if [ "$runmode" ];then ret $runmode;fi #overwrite test result when debug
+
 case $? in
 (0) run_normal ;;
 (1) run_invalid;;
