@@ -2,7 +2,7 @@
 # this is a script to help manage shell functions
 # it rudimentally parses given file for apparrent function declarations
 # and lists the names of found functions
-
+echo "broke rn";exit 1
 #comments with JUMP are jump points because of a plugin in my editor
 #(geany "addons" addon)
 : "
