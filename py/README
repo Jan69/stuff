@@ -1,0 +1,6 @@
+python stuff
+python3
+* generally python 3.8 should work, unless noted otherwise
+ * 3.7 should be fine too
+ * 3.6 may work
+ * lower than that tends to lack nice features such as f-strings and whatnot
