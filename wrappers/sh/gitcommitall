@@ -1,0 +1,2 @@
+#!/bin/sh
+git add --all&&VISUAL=cat git commit -a --allow-empty-message

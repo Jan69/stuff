@@ -1,0 +1,7 @@
+#!/bin/sh
+if [ "$1" = "commit" ];then
+ shift
+ /usr/bin/git commit --allow-empty-message "$@"
+else
+ /usr/bin/git "$@"
+fi
