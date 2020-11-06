@@ -1,4 +1,5 @@
 #!/bin/sh
+#script to get user selection, currently options are hardcoded
 echo "arrow keys to change selection"
 echo ""
 echo ""
@@ -59,6 +60,7 @@ text2='
 '
 
 current_text="text1"
+#evil eval is the only way to not hardcode variables and stuff
 text="$(eval "echo \"\$$current_text\"")"
 selected="false"
 #text has extra lines to make it look proper, now we remove them
@@ -85,6 +87,7 @@ while true;do
   printf "\033[99D"
   selected="false"
   if [ "$current_text" == "text1" ];then
+  #temporarily hardcoding variables, could be extended to unlimited texts with eval-ing
    printf "\033[2A"
    echo "selected $current_text nr. $n"
    export current_text="text2"
@@ -97,6 +100,8 @@ while true;do
   fi
   text="$(eval "echo \"\$$current_text\"")"
   text="$(echo "$text"|tail -n +2)"
+  n=1
+  printf "\033[2K\033[999D %s " "$(echo "$text"|tail -n +"$n"|head -n 1)";
  fi
 done;
 
