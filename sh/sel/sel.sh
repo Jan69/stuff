@@ -52,24 +52,37 @@ text1='
 (1.1) hello
 (1.2) ahoy
 (1.3) test 3
+(1.4) yeehaw
+(1.5) trolololo
 '
 text2='
 (2.1) hello again
 (2.2) ahoy there
 (2.3) test 30
+(3.4) maan
+(3.5) huehue
 '
 
+line_count=5
 current_text="text1"
 #evil eval is the only way to not hardcode variables and stuff
+#at the start, it goes: \$$current_text replaced by shell -> $text1 evaluated by eval -> into variable
 text="$(eval "echo \"\$$current_text\"")"
 selected="false"
 #text has extra lines to make it look proper, now we remove them
 #text="$(echo "$text"|tail -n +2|head -n -1)"
 text="$(echo "$text"|tail -n +2)"
+text_buffer="$({ echo "$text";echo "$text";echo "$text";}|tr -s "\n")"
 n=1 #line nr
-printf " ";echo "$text"|tail -n +"$n"|head -n 1|tr -d "\n"
+echo "selected \$current_text nr. \$n"
+echo "selected \$current_text nr. \$n"
+echo
+echo "$text_buffer"|head -n +"$(($n+1+$line_count))"|tail -n "$line_count"|sed 's/$/\x1b[0K/'
+printf "\033[1A"
 while true;do
  i=$((i + 1));
+ line="$(echo "$text_buffer"|head -n +"$(($n+1+$line_count))"|tail -n "$line_count"|sed -e "s/$/\x1b[0K/" -e "s/^[[:blank:]]*/  /" \
+                                                                  -e "$(( ($line_count+1) / 2))s/^  /\x1b[31m> /" -e "$(( ($line_count+1) / 2))s/$/\x1b[0m/")"
  o="$(b|awk '{print $2}')"
  case "$o" in
   ("↓") x="↓";n=$((n + 1)) ;;
@@ -81,27 +94,27 @@ while true;do
  if [ "$selected" == "false" ];then
   if [ "$n" -gt "$(echo "$text"|wc -l)" ];then n="1";fi
   if [ "$n" -lt "1" ];then n="$(echo "$text"|wc -l)";fi
-  printf "\033[2K\033[999D %s " "$(echo "$text"|tail -n +"$n"|head -n 1)";
-# echo "$i";
+  printf "\033[2K\033[$(($line_count - 1))A\033[999D%s" "$line"
  else
   printf "\033[99D"
   selected="false"
   if [ "$current_text" == "text1" ];then
   #temporarily hardcoding variables, could be extended to unlimited texts with eval-ing
-   printf "\033[2A"
+   printf "\033[$(($line_count+2))A\033[0K"
    echo "selected $current_text nr. $n"
+   printf "\033[$(($line_count+1))B"
    export current_text="text2"
-   printf "\033[2B"
   else
-   printf "\033[1A"
+   printf "\033[$(($line_count+1))A\033[0K"
    echo "selected $current_text nr. $n"
+   printf "\033[$(($line_count+0))B"
    export current_text="text1"
-   printf "\033[1B"
   fi
   text="$(eval "echo \"\$$current_text\"")"
   text="$(echo "$text"|tail -n +2)"
+  text_buffer="$({ echo "$text";echo "$text";echo "$text";}|tr -s "\n")"
   n=1
-  printf "\033[2K\033[999D %s " "$(echo "$text"|tail -n +"$n"|head -n 1)";
+  printf "\033[2K\033[$(($line_count - 1))A\033[999D%s" "$line"
  fi
 done;
 
