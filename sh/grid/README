@@ -1,0 +1,2 @@
+simple example of how a fullscreen grid system can be used, with coordinate drawing
+with some other widgets (such as sel.sh) which return cursor to known position, could be basis of a TUI

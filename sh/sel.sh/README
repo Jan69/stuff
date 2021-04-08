@@ -1,0 +1,10 @@
+this is a simple roller-selector
+not much to say, arrow keys up-down to move,
+the "selection" part is trivial to add, but I've not bothered yet
+you can change the palette, right now defaults to 256color
+and if you hold down the keys it will probably "lag"
+lag is expressed as not being able to catch up with your input,
+and as such, stepping through the input queue slower than you input new directions
+
+I have no idea if it even is possible to somehow empty that input queue in a reasonably posix way
+(the "non-posix" stty modes would be allowed here)
