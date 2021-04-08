@@ -1,0 +1,2 @@
+p(){ echo "${ANSI_FG_CYAN}$1$ANSI_RESET";}
+pbug(){ printf "\033[31m%s\033[0m" "$1";}
