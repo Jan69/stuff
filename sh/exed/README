@@ -1,0 +1,4 @@
+usage: exed [file.txt]
+lacking file uses default, ./list.txt
+
+demonstrates a way to automatically, based on user input, eval, comment, delete, or skip a line, very useful for, say, quickly accepting/denying user signups, or as a todo list (with minor modification, could be changed to add/delete/mark-done/mark-undone markdown checklist)

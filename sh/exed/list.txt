@@ -1,0 +1,3 @@
+echo kdi e d
+echo "a dhsa d" aosh
+#echo 'lol $PWD' yeah
