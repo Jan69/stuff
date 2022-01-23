@@ -2,8 +2,19 @@
 
 echo "arrow keys to change selection"
 #TODO: allow numeric selections
-echo "warning, holding/spamming keys will lag out"
+#echo "warning, holding/spamming keys will lag out"
+echo
 unset -v c;
+#null=/dev/null
+
+text="${1:-'
+(1) hello
+(2) ahoy
+(3) test 300
+(4) yeehaw
+(5) something
+(6) all hail jan6
+'}"
 
 r1b(){
  #magic function to read one byte, trying to be posix
@@ -24,7 +35,7 @@ r1b(){
 b(){
  #this function detects arrow key directions
  case "$(r1b)" in
-  ("") echo "NULL";;
+  ("") echo "enter  ↵";;
   ('')  if [ "$(r1b)" = '[' ];then
 #         it's a CSI escape sequence
 
@@ -50,47 +61,35 @@ b(){
 wrap(){ n="$1"
  if [ "${n}" -gt "$(echo "${text}"|wc -l)" ];then n="1";
  elif [ "${n}" -lt "1" ];then n="$(echo "${text}"|wc -l)";fi
- printf "%s\n" "$n"
+ printf "%s\n" "${n}"
 }
 
 printfscreen() {
  printf \
-"$(printf "%7s" ""|sed 's/ /\\033[999D\\033[K\\033[1A/g')\033[999D\033[K"\
+"$(printf "%7s" ''|sed 's/ /\\033[999D\\033[K\\033[1A/g')\033[999D\033[K"\
 "%s%$((ll+2))s%s\n"\
 "%s\033[%s %-${ll}s \033[0m%s\n"\
 "%s\033[%s %-${ll}s \033[0m%s\n"\
-$(: "%s\033[%s%-$((ll+2))s\033[0m%s\n")\
 "%s\033[%s %-${ll}s \033[0m%s\n"\
-$(: "%s\033[%s%-$((ll+2))s\033[0m%s\n")\
 "%s\033[%s %-${ll}s \033[0m%s\n"\
 "%s\033[%s %-${ll}s \033[0m%s\n"\
 "%s%-$((ll+2))s%s\n"\
- "$frame_top_left" "$(printf "%$((ll+2))s"|sed "s/ /$frame_top_mid/g")" "$frame_top_right" \
- "$frame_mid_left" "$esc1" "$(if [ $(wrap $((n-1))) = $maxline ];then  n=$((maxline-1)); else n=$((n-2)); fi;n="$(wrap "$n")";echo "$text"|tail -n +$n|head -n 1)" "$frame_mid_right" \
- "$frame_mid_left" "$esc2" "$(n="$(wrap "$((n-1))")";echo "$text"|tail -n +$n|head -n 1)" "$frame_mid_right" \
- $(: "$framediv_left" "$esc_b_2" "$(printf "%$((ll+2))s"|sed "s/ /$framediv_mid/g")" "$framediv_right") \
- "$frame_mid_left" "$esc3" "$(echo "$text"|tail -n +"$n"|head -n 1)" "$frame_mid_right" \
- $(: "$framediv_left" "$esc_b_2" "$(printf "%$((ll+2))s"|sed "s/ /$framediv_mid/g")" "$framediv_right") \
- "$frame_mid_left" "$esc2" "$(n="$(wrap "$((n+1))")";echo "$text"|tail -n +$n|head -n 1)" "$frame_mid_right" \
- "$frame_mid_left" "$esc1" "$(if [ $(wrap $((n+1)) ) = $minline ];then n=$((minline+1));else n=$((n+2));fi;n="$(wrap "$n")";echo "$text"|tail -n +$n|head -n 1)" "$frame_mid_right" \
- "$frame_btm_left" "$(printf "%$((ll+2))s"|sed "s/ /$frame_btm_mid/g")" "$frame_btm_right" \
+ "${frame_top_left}" "$(printf "%$((ll+2))s"|sed "s/ /${frame_top_mid}/g")" "${frame_top_right}" \
+ "${frame_mid_left}" "$esc1" "$(if [ "$(wrap $((n-1)))" = "$maxline" ];then  n=$((maxline-1)); else n=$((n-2)); fi;n="$(wrap "${n}")";echo "${text}"|tail -n +"${n}"|head -n 1)" "${frame_mid_right}" \
+ "${frame_mid_left}" "$esc2" "$(n="$(wrap "$((n-1))")";echo "${text}"|tail -n +"${n}"|head -n 1)" "${frame_mid_right}" \
+ "${frame_mid_left}" "$esc3" "$(echo "${text}"|tail -n +"${n}"|head -n 1)" "${frame_mid_right}" \
+ "${frame_mid_left}" "$esc2" "$(n="$(wrap "$((n+1))")";echo "${text}"|tail -n +"${n}"|head -n 1)" "${frame_mid_right}" \
+ "${frame_mid_left}" "$esc1" "$(if [ "$(wrap $((n+1)))" = "$minline" ];then n=$((minline+1));else n=$((n+2));fi;n="$(wrap "${n}")";echo "${text}"|tail -n +"${n}"|head -n 1)" "${frame_mid_right}" \
+ "${frame_btm_left}" "$(printf "%$((ll+2))s"|sed "s/ /${frame_btm_mid}/g")" "${frame_btm_right}" \
 
 }
 
-text='
-(1) hello
-(2) ahoy
-(3) test 300
-(4) yeehaw
-(5) something
-(6) all hail jan6
-'
 #longest line
-ll="$(echo "$text"|awk 'length > l {l=length;line=$0} END {print line}'|wc -m)"
+ll="$(echo "${text}"|awk 'length > l {l=length;line=$0} END {print line}'|wc -m)"
 #text has extra lines to make it look proper, now we remove them
-text="$(echo "$text"|tail -n +2|head -n -1)"
+text="$(echo "${text}"|tail -n +2|head -n -1)"
 #get max line nr
-maxline="$(echo "$text"|wc -l)"
+maxline="$(echo "${text}"|wc -l)"
 minline="1"
 
 frame="┌
@@ -101,9 +100,6 @@ frame="┌
 └
 ─
 ┘"
-framediv="├
-━
-┤"
 
 : '
 #16-color, non-bold
@@ -117,8 +113,8 @@ esc1="38;5;238m"
 esc2="38;5;247m"
 esc3="37;1m"
 # '
-esc_b_2="31m"
-esc_b_2="$esc1"
+#esc_b_2="31m"
+#esc_b_2="$esc1"
 
 frame_top_left="$(echo "$frame"|tail -n +1|head -n 1)"
 frame_top_mid="$(echo "$frame"|tail -n +2|head -n 1)"
@@ -129,26 +125,29 @@ frame_btm_left="$(echo "$frame"|tail -n +6|head -n 1)"
 frame_btm_mid="$(echo "$frame"|tail -n +7|head -n 1)"
 frame_btm_right="$(echo "$frame"|tail -n +8|head -n 1)"
 
-framediv_left="$(echo "$framediv"|tail -n +1|head -n 1)"
-framediv_mid="$(echo "$framediv"|tail -n +2|head -n 1)"
-framediv_right="$(echo "$framediv"|tail -n +3|head -n 1)"
+#framediv_left="$(echo "${framediv}"|tail -n +1|head -n 1)"
+#framediv_mid="$(echo "${framediv}"|tail -n +2|head -n 1)"
+#framediv_right="$(echo "${framediv}"|tail -n +3|head -n 1)"
 
 
 n=1 #line nr
 #initial screen print
-#printf " ";echo "$text"|tail -n +"$n"|head -n 1|tr -d "\n"
+#printf " ";echo "${text}"|tail -n +"${n}"|head -n 1|tr -d "\n"
 printf "%7s" ""|tr " " "\n"
 printfscreen
 
 while true;do
  i=$((i + 1));
- case "$(b|awk '{print $2}')" in
+ ba="$(b|awk '{print $2}')"
+ case "$ba" in
   ("↓") n=$((n + 1)) ;;
   ("↑") n=$((n - 1)) ;;
   ("←") : ;;
   ("→") : ;;
+  ("↵") printf "\033[8A\033[K%s\033[8B" "$(echo "${text}"|tail -n +"${n}"|head -n 1)" >&2;;
+  ( * ) : ;;
  esac;
- n="$(wrap "$n")";
+ n="$(wrap "${n}")";
  printfscreen
 # echo "$i";
 done;
