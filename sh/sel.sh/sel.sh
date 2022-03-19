@@ -7,18 +7,28 @@ echo
 unset -v c;
 #null=/dev/null
 
-text="${1:-'
+if [ -n "$1" ];then
+#require starting newline, makes it nicer as all the text would have same indent
+#no newline at the end though
+ text="$1
+"
+else
+ text='
 (1) hello
 (2) ahoy
 (3) test 300
 (4) yeehaw
 (5) something
 (6) all hail jan6
-'}"
+'
+fi
+
+text="$(echo "$text"|nl -b t -s ") "|sed "s/^[[:blank:]]*\([^[:blank:]].\+\)/(\1/")"
 
 r1b(){
  #magic function to read one byte, trying to be posix
  #TODO: detect shell and use builtin functions of bash, zsh etc when available
+ #probably a lot faster that way
  if [ -t 0 ];then
   stty_bak="$(stty -g)";
   stty -icanon min 1 time 0 -echo;
@@ -34,7 +44,8 @@ r1b(){
 
 b(){
  #this function detects arrow key directions
- case "$(r1b)" in
+ key="$(r1b)"
+ case "$key" in
   ("") echo "enter  ↵";;
   ('')  if [ "$(r1b)" = '[' ];then
 #         it's a CSI escape sequence
@@ -53,8 +64,21 @@ b(){
          else echo "ESC";
          fi;
   ;;
+  ([hjklHJKLwasdWASD])
+          case "$key" in
+           ([wWkK]) d="up   	↑";;
+           ([sSjJ]) d="down 	↓";;
+           ([dDlL]) d="right	→";;
+           ([aAhH]) d="left 	←";;
+          esac;
+          echo "${d}";;
+  ([1-9]) echo "direct $key";;
   (*) echo "OTHER";;
  esac
+}
+
+choose(){ n="$1"
+ printf "\033[8A\033[K%s\033[8B" "$(echo "${text}"|tail -n +"${n}"|head -n 1)" >&2
 }
 
 #wrap overflow
@@ -137,14 +161,15 @@ printf "%7s" ""|tr " " "\n"
 printfscreen
 
 while true;do
- i=$((i + 1));
+ #i=$((i + 1));
  ba="$(b|awk '{print $2}')"
  case "$ba" in
   ("↓") n=$((n + 1)) ;;
   ("↑") n=$((n - 1)) ;;
   ("←") : ;;
   ("→") : ;;
-  ("↵") printf "\033[8A\033[K%s\033[8B" "$(echo "${text}"|tail -n +"${n}"|head -n 1)" >&2;;
+  ("↵") choose "$n";;
+  ([0-9]*) choose "$ba";;
   ( * ) : ;;
  esac;
  n="$(wrap "${n}")";
