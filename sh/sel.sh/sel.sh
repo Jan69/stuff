@@ -7,23 +7,37 @@ echo
 unset -v c;
 #null=/dev/null
 
+submenu=0
+
 if [ -n "$1" ];then
 #require starting newline, makes it nicer as all the text would have same indent
 #no newline at the end though
- text="$1
-"
+ text="
+QUIT
+$1
+";shift
+ for i in "$@";do text="$text$i
+";done
 else
  text='
-(1) hello
-(2) ahoy
-(3) test 300
-(4) yeehaw
-(5) something
-(6) all hail jan6
+QUIT
+first
+hello
+ahoy
+yeehaw
+something
+all hail jan6
+sailing
+888
+NEIN
+yollo
+and
+whatnot
+more
 '
 fi
-
-text="$(echo "$text"|nl -b t -s ") "|sed "s/^[[:blank:]]*\([^[:blank:]].\+\)/(\1/")"
+#auto-numbering, assuming you won't need more than 99 items
+text="$(echo "${text}"|nl -v 0 -b t -s ") "|sed -e "s/^[[:blank:]]*\([^[:blank:]].\+\)/(\1/" -e "s/^(\([0-9][^0-9]\)/(0\1/" )"
 
 r1b(){
  #magic function to read one byte, trying to be posix
@@ -46,7 +60,7 @@ b(){
  #this function detects arrow key directions
  key="$(r1b)"
  case "$key" in
-  ("") echo "enter  ↵";;
+  (""|[[:blank:]]|[nN]) echo "select  ↵";;
   ('')  if [ "$(r1b)" = '[' ];then
 #         it's a CSI escape sequence
 
@@ -72,13 +86,20 @@ b(){
            ([aAhH]) d="left 	←";;
           esac;
           echo "${d}";;
-  ([1-9]) echo "direct $key";;
+  ([1-9]) echo "direct $((key+1))";;
+  ([qQ0]) echo "quit ×";;
   (*) echo "OTHER";;
  esac
 }
 
+quit(){ printf "\033[999D";exit 0;}
+
 choose(){ n="$1"
  printf "\033[8A\033[K%s\033[8B" "$(echo "${text}"|tail -n +"${n}"|head -n 1)" >&2
+ m="$((n-1))" #because starting with 0
+ case "${m}" in
+  (0) quit;;
+ esac
 }
 
 #wrap overflow
@@ -170,6 +191,7 @@ while true;do
   ("→") : ;;
   ("↵") choose "$n";;
   ([0-9]*) choose "$ba";;
+  ("×") choose 1;; #quit
   ( * ) : ;;
  esac;
  n="$(wrap "${n}")";
