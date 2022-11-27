@@ -1,5 +1,7 @@
 #!/bin/sh
 
+exec 3>&2 2>&1 1>&3 3>&- #stdout to stderr, and vice versa
+
 echo "arrow keys to change selection"
 #TODO: allow numeric selections
 #echo "warning, holding/spamming keys will lag out"
@@ -95,10 +97,11 @@ b(){
 quit(){ printf "\033[999D";exit 0;}
 
 choose(){ n="$1"
- printf "\033[8A\033[K%s\033[8B" "$(echo "${text}"|tail -n +"${n}"|head -n 1)" >&2
+ printf "\033[8A\033[K%s\033[8B" "$(echo "${text}"|tail -n +"${n}"|head -n 1)" #>&2
  m="$((n-1))" #because starting with 0
  case "${m}" in
   (0) quit;;
+  (*) echo "${text}"|tail -n +"${n}"|head -n 1|cut -d \  -f 2- >&2; quit;;
  esac
 }
 
